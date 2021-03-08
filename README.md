@@ -16,7 +16,7 @@ For instructions to install vdt see [their github](https://github.com/dpiparo/vd
 The Makefile assumes it installed to /usr/local/, if it is installed to some
 other location, change the `vdt_dir` variable in the Makefile to point to the correct location. (Better not to use /usr/local because one does not have root access)
 
-All of the source code is in the src/ directory which contains a Makefile. So you should be able to compile by simply changing to the src/ directory and running `make`. All the compiled executables are put in the bin/ directory. 
+All of the source code is in the src/ directory which contains a Makefile. So you should be able to compile by simply changing to the src/ directory and running `make`. All the compiled executables are put in the bin/ directory. (To obtain standalone ROOT C++ on LPC: https://uscms.org/uscms_at_work/computing/setup/setup_software.shtml#lcgsoft)
 
 
 Note that this can be compiled and run from within a CMSSW release by linking to
