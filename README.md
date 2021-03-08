@@ -11,10 +11,10 @@ Run the script **fetch\_cmssw\_code.sh** grabs the latest version of all the nee
 If you want to grab from a branch other than the cmssw master (eg to test some
 changes), you can change the `branch` variable in the script to point to a different branch.
 
-The code shared with CMSSW uses the [vdt](https://github.com/dpiparo/vdt) library so you must have it installed.
-For instructions to install vdt see [their github](https://github.com/dpiparo/vdt).
+The code shared with CMSSW uses the [vdt](https://github.com/dpiparo/vdt) library so you must have it installed. 
+For instructions to install vdt see [their github](https://github.com/dpiparo/vdt). (If the CMake version is old, hacky fix: change it in CMakeLists.txt.)
 The Makefile assumes it installed to /usr/local/, if it is installed to some
-other location, change the `vdt_dir` variable in the Makefile to point to the correct location. 
+other location, change the `vdt_dir` variable in the Makefile to point to the correct location. (Better not to use /usr/local because one does not have root access)
 
 All of the source code is in the src/ directory which contains a Makefile. So you should be able to compile by simply changing to the src/ directory and running `make`. All the compiled executables are put in the bin/ directory. 
 
