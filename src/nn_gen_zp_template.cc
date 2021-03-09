@@ -26,9 +26,11 @@
  *   Write integers for the templates
  */
 
+// Modifying to include NN_reco
+
 #define TEMPL_DEBUG
 #include "template_utils.h"
-
+#include "nn_reco.cc"
 
 
 // Main program  
@@ -228,10 +230,13 @@ int main(int argc, char *argv[])
     const int charge_idx = 50;
     const int y_chi2_fp_idx = 58;
     const int x_chi2_fp_idx = 62;
+    const int y_1dcnn_idx = 70;
+    const int x_1dcnn_idx = 75
+
     const int y_corr_idx = 0;
     const int x_corr_idx = 5;
 
-    const int n_hists = 70;
+    const int n_hists = 90; // 70->90
     const int n_profs = 10;
 
 
@@ -299,7 +304,7 @@ int main(int argc, char *argv[])
     hp[x_generic_idx + 1] = new TH1F("h402","dx_generic (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
     hp[x_generic_idx + 2] = new TH1F("h403","dx_generic (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
     hp[x_generic_idx + 3] = new TH1F("h404","dx_generic (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
-    hp[x_generic_idx + 4] = new TH1F("h405","dx_generic (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_generic_idx + 4] = new TH1F("h405","dx_generic (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);    
 
 
     hp[charge_idx + 0] = new TH1F("h100","Number generated e",150,0.,500000.);	
@@ -310,6 +315,20 @@ int main(int argc, char *argv[])
     hp[charge_idx + 5] = new TH1F ("h504","npix(0.85mn > signal)",40,0.5,40.5);
     hp[charge_idx + 6] = new TH1F ("h505","2 Cluster Merged Charge",500,0.,1000000.);
     hp[charge_idx + 7] = new TH1F ("h606","measured Q/generated Q",300,0.,1.5);
+
+ //======= NNs =========   
+    hp[y_1dcnn_idx + 0] = new TH1F("h406","dy_1dcnn (all sig); #Deltay (#mum)",ny,-halfys,halfys);
+    hp[y_1dcnn_idx + 1] = new TH1F("h407","dy_1dcnn (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_1dcnn_idx + 2] = new TH1F("h408","dy_1dcnn (1.5mn > signal > 1.0mn); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_1dcnn_idx + 3] = new TH1F("h409","dy_1dcnn (1.0mn > signal > 0.85mn); #Deltay (#mum)",ny,-halfys,halfys);     
+    hp[y_1dcnn_idx + 4] = new TH1F("h410","dy_1dcnn (0.85mn > signal); #Deltay (#mum)",ny,-halfys,halfys);      
+
+    hp[x_1dcnn_idx + 0] = new TH1F("h401","dx_1dcnn (all sig); #Deltax (#mum)",nx,-halfxs,halfxs);
+    hp[x_1dcnn_idx + 1] = new TH1F("h402","dx_1dcnn (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_1dcnn_idx + 2] = new TH1F("h403","dx_1dcnn (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_1dcnn_idx + 3] = new TH1F("h404","dx_1dcnn (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
+    hp[x_1dcnn_idx + 4] = new TH1F("h405","dx_1dcnn (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
+//========================
 
     int nbins_prof = 10;
     profs[y_corr_idx + 0] = new TProfile("h211","dy vs qfl (all sig) ", nbins_prof, -1., 1., -50., 50.);
@@ -1195,7 +1214,6 @@ int main(int argc, char *argv[])
                 hp[x_generic_idx+1 +qbins[n]]->Fill(dx_gen);
             }
 
-//======================================================================================================
 
 
             // Do first round of template reco on the cluster without charge
@@ -1210,9 +1228,21 @@ int main(int argc, char *argv[])
                     cluster_local[i][j] = cluster[n][i][j];
                 }
             }
+//============================================ NN reco ===============================================================
+            printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
+            int pass = 1dcnn_reco(&cluster_local, cotalpha, cotbeta, xrec, yrec)
 
+            float dx_1dcnn = xrec - xhit[n];
+            float dy_1dcnn = yrec - yhit[n];
 
+             hp[y_1dcnn_idx]->Fill(dy_1dcnn);
+             hp[y_1dcnn_idx+1 +qbins[n]]->Fill(dy_1dcnn);
+            
+             hp[x_1dcnn_idx]->Fill(dx_1dcnn);
+             hp[x_1dcnn_idx+1 +qbins[n]]->Fill(dx_1dcnn);
+            
 
+//======================================================================================================
             //        if(fabs(cotbeta) < 2.1) continue;
             // Do the template analysis on the cluster 
             SiPixelTemplateReco::ClusMatrix clusterPayload{&cluster_local[0][0], xdouble, ydouble, mrow,mcol};
@@ -1557,9 +1587,12 @@ int main(int argc, char *argv[])
                 dytwo, sytwo, dxtwo, sxtwo, qmin30, qmin60);
 
         //x and y generic reisduals info
+        //USING THE NN RESIDUALS INSTEAD
         for(int i=0; i<4; i++){
-            auto y_pars = get_gaussian_pars(hp[y_generic_idx +1 +i], minErrY);
-            auto x_pars = get_gaussian_pars(hp[x_generic_idx +1 +i], minErrX);
+            //auto y_pars = get_gaussian_pars(hp[y_generic_idx +1 +i], minErrY);
+            //auto x_pars = get_gaussian_pars(hp[x_generic_idx +1 +i], minErrX);
+            auto y_pars = get_gaussian_pars(hp[y_1dcnn_idx +1 +i], minErrY);
+            auto x_pars = get_gaussian_pars(hp[x_1dcnn_idx +1 +i], minErrX);
             fprintf(generr_output_file, "%9.1f %9.1f %9.1f %9.1f \n", 
                     y_pars[0], y_pars[1], x_pars[0], x_pars[1]);
         }
