@@ -23,6 +23,7 @@
 #include "../cmssw_code/SiPixelTemplateReco2D.cc"
 #include "../cmssw_code/SiPixelUtils.cc"
 #include "../cmssw_code/SiPixelGenError.cc"
+#include "../cmssw_code/Tensorflow.h"
 
 
 using namespace std;
