@@ -3,7 +3,7 @@ compiler_flags=-std=c++11 -Wall -g
 vdt_dir=/cvmfs/cms.cern.ch/slc7_amd64_gcc820/cms/vdt/0.4.0-nmpfii/include
 includes= -I. -I../cmssw_code/ -I$(vdt_dir) -I/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.67.0-pafccj/include
 DEPS= template_utils.h ranlux.c ../cmssw_code/*
-EXE= compare_templates gen_zp_template gen_zp_template2d gen_xy_template gen_xy_template2d test_template
+EXE= compare_templates gen_zp_template nn_gen_zp_template gen_zp_template2d gen_xy_template gen_xy_template2d test_template
 ODIR=../bin
 BOOST_FLAG=-DSI_PIXEL_TEMPLATE_USE_BOOST
 
@@ -15,6 +15,9 @@ gen_zp_template: gen_zp_template.cc $(DEPS)
 
 gen_zp_template2d: gen_zp_template2d.cc $(DEPS)
 	g++ gen_zp_template2d.cc -o $(ODIR)/gen_zp_template2d $(compiler_flags)  $(root_flags) $(includes) $(BOOST_FLAG)
+
+nn_gen_zp_template: nn_gen_zp_template.cc $(DEPS)
+	g++ nn_gen_zp_template.cc -o $(ODIR)/nn_gen_zp_template $(compiler_flags)  $(root_flags) $(includes) $(BOOST_FLAG)
 
 gen_xy_template: gen_xy_template.cc $(DEPS)
 	g++ gen_xy_template.cc   -o $(ODIR)/gen_xy_template $(compiler_flags) $(root_flags) $(includes)
