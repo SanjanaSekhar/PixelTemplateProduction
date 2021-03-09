@@ -1,7 +1,8 @@
 root_flags= `root-config --cflags --ldflags --libs --glibs`
 compiler_flags=-std=c++11 -Wall -g
 vdt_dir=/uscms/home/ssekhar/nobackup/PixelCPE/include
-includes= -I. -I../cmssw_code/ -I$(vdt_dir) -I/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.67.0-pafccj/include
+tensorflow_dir=/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/py2-tensorflow/2.1.0-pfdnen/lib/python2.7/site-packages
+includes= -I. -I../cmssw_code/ -I$(vdt_dir) -I/cvmfs/cms.cern.ch/slc7_amd64_gcc820/external/boost/1.67.0-pafccj/include -I$(tensorflow_dir)
 DEPS= template_utils.h ranlux.c ../cmssw_code/*
 EXE= compare_templates gen_zp_template nn_gen_zp_template gen_zp_template2d gen_xy_template gen_xy_template2d test_template
 ODIR=../bin
