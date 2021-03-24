@@ -86,7 +86,7 @@ An example `test_params.txt` config is:
 
 > 58401 0 0.0 0.0
 
-## Installing tensorflow
+## Installing the Tensorflow C++ API
 
 This link was complete, but is specific to the distributions mentioned. Please check with your distributions to see if it is compatible.
 https://gist.github.com/kmhofmann/e368a2ebba05f807fa1a90b3bf9a1e03
@@ -94,7 +94,7 @@ https://gist.github.com/kmhofmann/e368a2ebba05f807fa1a90b3bf9a1e03
 There are a few modifications to the steps in the links, they are detailed here:
 
 - After compiling Bazel, remember to add `bazel-3.1.0/output/` to your PATH
-- Before your run `./configure`, you should export a few flags to tell TensorFlow whether it should build certain features. In particular, `export TF_NEED_CUDA=0` disables GPU support. If you need GPU support, you should do the steps in the guide related to CUDA. You can run `./configure` once you defined these flags.This is the list of flags used in the CMSSW TF setup:
+- Before your run `./configure`, you should export a few flags to tell TensorFlow whether it should build certain features. In particular, `export TF_NEED_CUDA=0` disables GPU support. If you need GPU support, you should do the steps in the guide related to CUDA. You can run `./configure` once you defined these flags. This is the list of flags used in the CMSSW TF setup:
 
 ```
 export TF_NEED_JEMALLOC=0
