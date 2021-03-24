@@ -120,7 +120,7 @@ export TF_NEED_TENSORRT=0
 - When you run `./configure` read the options presented carefully. Do not change the bazel configurations options. 
 - Replace `bazel build --config=opt -c opt //tensorflow/tools/pip_package:build_pip_package` with the following:
 ```
-export BAZEL_OPTS="--config=opt -c opt --batch -s --verbose_failures -j 8 --config=noaws --config=nogcp --config=nohdfs --config=nonccl"
+export BAZEL_OPTS="--config=opt -c opt -s --verbose_failures -j 8 --config=noaws --config=nogcp --config=nohdfs --config=nonccl"
 bazel build $BAZEL_OPTS //tensorflow/tools/pip_package:build_pip_package
 ```
 - You may get an error saying that `/tmp/tensorflow_pkg/tensorflow-2.3.0-cp38-cp38-linux_x86_64.whl`. In such a case, recreate the wheel file in a different directory (within `tensorflow/` for example).
