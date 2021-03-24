@@ -14,11 +14,11 @@ changes), you can change the `branch` variable in the script to point to a diffe
 The code shared with CMSSW uses the [vdt](https://github.com/dpiparo/vdt) library so you must have it installed. 
 For instructions to install vdt see [their github](https://github.com/dpiparo/vdt). (If the CMake version is old, hacky fix: change it in CMakeLists.txt.)
 The Makefile assumes it installed to /usr/local/, if it is installed to some
-other location, change the `vdt_dir` variable in the Makefile to point to the correct location. (Better not to use /usr/local because one does not have root access)
+other location, change the `vdt_dir` variable in the Makefile to point to the correct location. (Better not to use `/usr/local` if working on LPC because one does not have root access.)
 
-You may also need to install BOOST: `sudo apt-get install libboost-all-dev`
+You may also need to install BOOST if working locally: `sudo apt-get install libboost-all-dev`
 
-All of the source code is in the src/ directory which contains a Makefile. So you should be able to compile by simply changing to the src/ directory and running `make`. All the compiled executables are put in the bin/ directory. (To obtain standalone ROOT C++ on LPC: https://uscms.org/uscms_at_work/computing/setup/setup_software.shtml#lcgsoft)
+All of the source code is in the src/ directory which contains a Makefile. So you should be able to compile by simply changing to the src/ directory and running `make`. All the compiled executables are put in the bin/ directory. (To obtain standalone ROOT C++ on LPC, check [this]( https://uscms.org/uscms_at_work/computing/setup/setup_software.shtml#lcgsoft))
 
 
 Note that this can be compiled and run from within a CMSSW release by linking to
@@ -88,10 +88,9 @@ An example `test_params.txt` config is:
 
 ## Installing the Tensorflow C++ API
 
-This link was complete, but is specific to the distributions mentioned. Please check with your distributions to see if it is compatible.
-https://gist.github.com/kmhofmann/e368a2ebba05f807fa1a90b3bf9a1e03
+[This link](https://gist.github.com/kmhofmann/e368a2ebba05f807fa1a90b3bf9a1e03) was complete, but is specific to the distributions mentioned. Please check with your distributions to see if it is compatible.
 
-There are a few modifications to the steps in the links, they are detailed here:
+There are a few modifications to the steps in the link, they are detailed here:
 
 - After compiling Bazel, remember to add `bazel-3.1.0/output/` to your PATH
 - Before your run `./configure`, you should export a few flags to tell TensorFlow whether it should build certain features. In particular, `export TF_NEED_CUDA=0` disables GPU support. If you need GPU support, you should do the steps in the guide related to CUDA. You can run `./configure` once you defined these flags. This is the list of flags used in the CMSSW TF setup:
