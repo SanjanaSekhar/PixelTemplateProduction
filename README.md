@@ -16,6 +16,8 @@ For instructions to install vdt see [their github](https://github.com/dpiparo/vd
 The Makefile assumes it installed to /usr/local/, if it is installed to some
 other location, change the `vdt_dir` variable in the Makefile to point to the correct location. (Better not to use /usr/local because one does not have root access)
 
+You may also need to install BOOST: `sudo apt-get install libboost-all-dev`
+
 All of the source code is in the src/ directory which contains a Makefile. So you should be able to compile by simply changing to the src/ directory and running `make`. All the compiled executables are put in the bin/ directory. (To obtain standalone ROOT C++ on LPC: https://uscms.org/uscms_at_work/computing/setup/setup_software.shtml#lcgsoft)
 
 
@@ -83,4 +85,59 @@ An example `test_params.txt` config is:
 > 58606 150. 1600. 1600. 0.073 0.080 0.08 350. 0
 
 > 58401 0 0.0 0.0
+
+## Installing tensorflow
+
+This link was complete, but is specific to the distributions mentioned. Please check with your distributions to see if it is compatible.
+https://gist.github.com/kmhofmann/e368a2ebba05f807fa1a90b3bf9a1e03
+
+There are a few modifications to the steps in the links, they are detailed here:
+
+- After compiling Bazel, remember to add `bazel-3.1.0/output/` to your PATH
+- Before your run `./configure`, you should export a few flags to tell TensorFlow whether it should build certain features. In particular, `export TF_NEED_CUDA=0` disables GPU support. If you need GPU support, you should do the steps in the guide related to CUDA. You can run `./configure` once you defined these flags.This is the list of flags used in the CMSSW TF setup:
+
+```
+export TF_NEED_JEMALLOC=0
+export TF_NEED_HDFS=0
+export TF_NEED_GCP=0
+export TF_ENABLE_XLA=0
+export TF_NEED_OPENCL=0
+export TF_NEED_CUDA=0
+export TF_NEED_VERBS=0
+export TF_NEED_MKL=0
+export TF_NEED_MPI=0
+export TF_NEED_S3=0
+export TF_NEED_GDR=0
+export TF_NEED_OPENCL_SYCL=0
+export TF_SET_ANDROID_WORKSPACE=false
+export TF_NEED_KAFKA=false
+export TF_NEED_AWS=0
+export TF_DOWNLOAD_CLANG=0
+export TF_NEED_IGNITE=0
+export TF_NEED_ROCM=0
+export TF_NEED_TENSORRT=0
+```
+
+- When you run `./configure` read the options presented carefully. Do not change the bazel configurations options. 
+- Replace `bazel build --config=opt -c opt //tensorflow/tools/pip_package:build_pip_package` with the following:
+```
+export BAZEL_OPTS="--config=opt -c opt --batch -s --verbose_failures -j 8 --config=noaws --config=nogcp --config=nohdfs --config=nonccl"
+bazel build $BAZEL_OPTS //tensorflow/tools/pip_package:build_pip_package
+```
+- You may get an error saying that `/tmp/tensorflow_pkg/tensorflow-2.3.0-cp38-cp38-linux_x86_64.whl`. In such a case, recreate the wheel file in a different directory (within `tensorflow/` for example).
+- After testing the Python installation we can build targets for the C++ implementation.
+
+```
+bazel build $BAZEL_OPTS //tensorflow:tensorflow
+bazel build $BAZEL_OPTS //tensorflow:tensorflow_cc
+bazel build $BAZEL_OPTS //tensorflow/tools/graph_transforms:transform_graph
+bazel build $BAZEL_OPTS //tensorflow/compiler/tf2xla:tf2xla
+bazel build $BAZEL_OPTS //tensorflow/compiler/xla:cpu_function_runtime
+bazel build $BAZEL_OPTS //tensorflow/compiler/xla:executable_run_options
+bazel build $BAZEL_OPTS //tensorflow/compiler/tf2xla:xla_compiled_cpu_function
+bazel build $BAZEL_OPTS //tensorflow/core/profiler
+bazel build $BAZEL_OPTS //tensorflow:install_headers
+```
+
+
 
