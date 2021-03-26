@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
     const int y_chi2_fp_idx = 58;
     const int x_chi2_fp_idx = 62;
     const int y_1dcnn_idx = 70;
-    const int x_1dcnn_idx = 75
+    const int x_1dcnn_idx = 75;
 
     const int y_corr_idx = 0;
     const int x_corr_idx = 5;
@@ -1230,7 +1230,7 @@ int main(int argc, char *argv[])
             }
 //============================================ NN reco ===============================================================
             printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
-            int pass = 1dcnn_reco(&cluster_local, cotalpha, cotbeta, xrec, yrec)
+            do_1dcnn_reco(cluster_local, cotalpha, cotbeta, xrec, yrec);
 
             float dx_1dcnn = xrec - xhit[n];
             float dy_1dcnn = yrec - yhit[n];
