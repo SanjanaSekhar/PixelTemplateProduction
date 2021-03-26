@@ -32,45 +32,65 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
 
    GraphDef* graphDef_x;
   Session* session_x;
+  Status status = NewSession(SessionOptions(), &session_x);
+  if (!status.ok()) {
+    std::cout << status.ToString() << "\n";
+    print('Session x not okay');
+  }
   GraphDef* graphDef_y;
   Session* session_y;
+  Status status = NewSession(SessionOptions(), &session_y);
+  if (!status.ok()) {
+    std::cout << status.ToString() << "\n";
+    print('Session y not okay');
+  }
   std::vector<tensorflow::Tensor> output_x;
   std::vector<tensorflow::Tensor> output_y;
 
-  setLogging("2");
+  //setLogging("2");
   //=========== infer x ====================
   // load the graph
-   graphDef_x = loadGraphDef(graph_x);
+   status = ReadBinaryProto(Env::Default(), graph_x, &graphDef_x);
+
+  if (!status.ok()) {
+    std::cout << status.ToString() << "\n";
+    print('Error in graph_x pb');
+  }
    // create a new session and add the graphDef
-  session_x = createSession(graphDef_x);
+  status = session_x->Create(graphDef_x);
    // define a tensor and fill it with cluster projection
-  tensorflow::Tensor input(tensorflow::DT_FLOAT, {1,TXSIZE+2,1});
+  tensorflow::Tensor input_x(tensorflow::DT_FLOAT, {1,TXSIZE+2,1});
   for (size_t i = 0; i < TXSIZE; i++) {
-  	input.tensor<float,3>()(0, i, 0) = 0;
+  	input_x.tensor<float,3>()(0, i, 0) = 0;
   	for (size_t j = 0; j < TYSIZE; j++){
   		//1D projection in x
-  		input.tensor<float,3>()(0, i, 0) += cluster[i][j];
+  		input_x.tensor<float,3>()(0, i, 0) += cluster[i][j];
   	}
   }
-  input.tensor<float,3>()(0, TXSIZE, 0) = cotalpha;
-  input.tensor<float,3>()(0, TXSIZE+1, 0) = cotbeta;
+  input_x.tensor<float,3>()(0, TXSIZE, 0) = cotalpha;
+  input_x.tensor<float,3>()(0, TXSIZE+1, 0) = cotbeta;
   // define the output and run
   
-  tensorflow::run(session_x, {{inputTensorName_, input}}, {outputTensorName_}, &output_x);
+ status = session_x->Run({{inputTensorName_, input_x}}, {outputTensorName_}, &output_x);
 
   // print the output
   std::cout << "THIS IS THE FROM THE 1DCNN xrec -> " << output_x[0].matrix<float>()(0,0) << std::endl << std::endl;
   xrec = output_x[0].matrix<float>()(0,0);
 
-  tensorflow::closeSession(session_x);
+  session_x->Close();
   delete graphDef_x;
   graphDef_x = nullptr;
 
   //=========== infer y ====================
   // load the graph
-   graphDef_y = tensorflow::loadGraphDef(graph_y);
+   status = ReadBinaryProto(Env::Default(), graph_y, &graphDef_y);
+
+  if (!status.ok()) {
+    std::cout << status.ToString() << "\n";
+    print('Error in reading graph_y');
+  }
    // create a new session and add the graphDef
-  session_y = tensorflow::createSession(graphDef_y);
+  status = session_y->Create(graphDef_y);
    // define a tensor and fill it with cluster projection
   tensorflow::Tensor input_y(tensorflow::DT_FLOAT, {1,TYSIZE+2,1});
   for (size_t j = 0; j < TYSIZE; j++) {
@@ -84,13 +104,13 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
   input_y.tensor<float,3>()(0, TYSIZE+1, 0) = cotbeta;
 
   // define the output and run
-  tensorflow::run(session_y, {{inputTensorName_, input_y}}, {outputTensorName_}, &output_y);
+ status = session_y->Run({{inputTensorName_, input_y}}, {outputTensorName_}, &output_y);
 
   // print the output
   std::cout << "THIS IS THE FROM THE 1DCNN yrec -> " << output_y[0].matrix<float>()(0,0) << std::endl << std::endl;
   yrec = output_y[0].matrix<float>()(0,0);
 
-  tensorflow::closeSession(session_y);
+  session_y->Close();
   delete graphDef_y;
   graphDef_y = nullptr;
 
