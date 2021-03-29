@@ -2,9 +2,6 @@
 // Author: Sanjana Sekhar
 // Date: 3/8/21
 
-//#include "template_utils.h"
-//#include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
-//#include <memory>
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/lib/core/threadpool.h"
 #include "tensorflow/core/lib/io/path.h"
@@ -15,6 +12,9 @@
 #include "tensorflow/cc/saved_model/constants.h"
 #include "tensorflow/cc/saved_model/tag_constants.h"
 #include "tensorflow/core/platform/env.h"
+#include <chrono>
+using namespace std::chrono;
+
 using namespace tensorflow;
 
 void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta, float& xrec, float& yrec)
@@ -24,8 +24,8 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
    sprintf(graph_x,"data/graph_x_%s.pb",graph_ext);
    sprintf(graph_y,"data/graph_y_%s.pb",graph_ext) ;
 
-   printf("TXSIZE = %i\n", TXSIZE);
-   printf("TYSIZE = %i\n", TYSIZE);
+   //printf("TXSIZE = %i\n", TXSIZE);
+   //printf("TYSIZE = %i\n", TYSIZE);
    
    sprintf(inputTensorName_,"input_1");
    sprintf(outputTensorName_,"Identity"); 
@@ -71,11 +71,12 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
   input_x.tensor<float,3>()(0, TXSIZE, 0) = cotalpha;
   input_x.tensor<float,3>()(0, TXSIZE+1, 0) = cotbeta;
   // define the output and run
-  
+  auto start = high_resolution_clock::now();
  status = session_x->Run({{inputTensorName_, input_x}}, {outputTensorName_}, {},&output_x);
-
+auto stop = high_resolution_clock::now();
+	//printf("Inference time for x = %0.3f us",duration_cast<microseconds>(stop-start));
   // print the output
-  std::cout << "THIS IS THE FROM THE 1DCNN xrec -> " << output_x[0].matrix<float>()(0,0) << std::endl << std::endl;
+  //std::cout << "THIS IS THE FROM THE 1DCNN xrec -> " << output_x[0].matrix<float>()(0,0) << std::endl << std::endl;
   xrec = output_x[0].matrix<float>()(0,0);
 
   session_x->Close();
@@ -99,6 +100,7 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
   	for (size_t i = 0; i < TXSIZE; i++){
   		//1D projection in x
   		input_y.tensor<float,3>()(0, j, 0) += cluster[i][j];
+		//printf("j = %i, input_y = %0.3f\n",j,input_y.tensor<float,3>()(0, j, 0));
   	}
   }
   input_y.tensor<float,3>()(0, TYSIZE, 0) = cotalpha;
@@ -108,7 +110,7 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
  status = session_y->Run({{inputTensorName_, input_y}}, {outputTensorName_}, {},&output_y);
 
   // print the output
-  std::cout << "THIS IS THE FROM THE 1DCNN yrec -> " << output_y[0].matrix<float>()(0,0) << std::endl << std::endl;
+//std::cout << "THIS IS THE FROM THE 1DCNN yrec -> " << output_y[0].matrix<float>()(0,0) << std::endl << std::endl;
   yrec = output_y[0].matrix<float>()(0,0);
 
   session_y->Close();

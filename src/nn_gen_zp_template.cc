@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    sprintf(infile,"generror_summary_zp%5.5d.out",id);
+    sprintf(infile,"generror_summary_nnzp%5.5d.out",id);
     generr_output_file = fopen(infile, "w");
     if (generr_output_file==NULL) {
         printf("couldn't open generr output file/n");
@@ -317,17 +317,17 @@ int main(int argc, char *argv[])
     hp[charge_idx + 7] = new TH1F ("h606","measured Q/generated Q",300,0.,1.5);
 
  //======= NNs =========   
-    hp[y_1dcnn_idx + 0] = new TH1F("h406","dy_1dcnn (all sig); #Deltay (#mum)",ny,-halfys,halfys);
-    hp[y_1dcnn_idx + 1] = new TH1F("h407","dy_1dcnn (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);      
-    hp[y_1dcnn_idx + 2] = new TH1F("h408","dy_1dcnn (1.5mn > signal > 1.0mn); #Deltay (#mum)",ny,-halfys,halfys);      
-    hp[y_1dcnn_idx + 3] = new TH1F("h409","dy_1dcnn (1.0mn > signal > 0.85mn); #Deltay (#mum)",ny,-halfys,halfys);     
-    hp[y_1dcnn_idx + 4] = new TH1F("h410","dy_1dcnn (0.85mn > signal); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_1dcnn_idx + 0] = new TH1F("h706","dy_1dcnn (all sig); #Deltay (#mum)",ny,-halfys,halfys);
+    hp[y_1dcnn_idx + 1] = new TH1F("h707","dy_1dcnn (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_1dcnn_idx + 2] = new TH1F("h708","dy_1dcnn (1.5mn > signal > 1.0mn); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_1dcnn_idx + 3] = new TH1F("h709","dy_1dcnn (1.0mn > signal > 0.85mn); #Deltay (#mum)",ny,-halfys,halfys);     
+    hp[y_1dcnn_idx + 4] = new TH1F("h710","dy_1dcnn (0.85mn > signal); #Deltay (#mum)",ny,-halfys,halfys);      
 
-    hp[x_1dcnn_idx + 0] = new TH1F("h401","dx_1dcnn (all sig); #Deltax (#mum)",nx,-halfxs,halfxs);
-    hp[x_1dcnn_idx + 1] = new TH1F("h402","dx_1dcnn (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
-    hp[x_1dcnn_idx + 2] = new TH1F("h403","dx_1dcnn (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
-    hp[x_1dcnn_idx + 3] = new TH1F("h404","dx_1dcnn (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
-    hp[x_1dcnn_idx + 4] = new TH1F("h405","dx_1dcnn (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_1dcnn_idx + 0] = new TH1F("h701","dx_1dcnn (all sig); #Deltax (#mum)",nx,-halfxs,halfxs);
+    hp[x_1dcnn_idx + 1] = new TH1F("h702","dx_1dcnn (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_1dcnn_idx + 2] = new TH1F("h703","dx_1dcnn (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_1dcnn_idx + 3] = new TH1F("h704","dx_1dcnn (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
+    hp[x_1dcnn_idx + 4] = new TH1F("h705","dx_1dcnn (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
 //========================
 
     int nbins_prof = 10;
@@ -502,7 +502,7 @@ int main(int argc, char *argv[])
 
 
 
-        sprintf(infile,"template_events_d%05i.out",ifile);
+        sprintf(infile,"template_events_d%05i_temp.out",ifile);
 
         printf("opening file %s to get pixel events \n", infile);
 
@@ -1230,7 +1230,7 @@ int main(int argc, char *argv[])
             }
 //============================================ NN reco ===============================================================
           
-	    printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
+	//printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
             do_1dcnn_reco(cluster_local, cotalpha, cotbeta, xrec, yrec);
 
             float dx_1dcnn = xrec - xhit[n];
