@@ -149,7 +149,10 @@ python -c 'import tensorflow as tf; print(" ".join(tf.sysconfig.get_link_flags()
 Include the compile flags and link flags. Note, you need to include 2 shared libraries: `libtensorflow_framework.so.2` and `libtensorflow_cc.so.2`. (During compilation if some headers are not found you may have to include the directories containing those files specifically.)
 
 Additionally you would have to include the following link flags before the shared libraries:
-`-Wl,--allow-multiple-definition -Wl,--whole-archive -l:libtensorflow_framework.so.2 -Wl,--whole-archive -Wl,--no-as-needed -l:libtensorflow_cc.so.2.3.0`
-
+```
+-Wl,--allow-multiple-definition -Wl,--whole-archive -l:libtensorflow_framework.so.2 -Wl,--whole-archive -Wl,--no-as-needed -l:libtensorflow_cc.so.2.3.0
+```
 After compilation, export `LD_LIBRARY_PATH` to point to the location of the shared libraries.
-`export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path to .so files>
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path to .so files>
+```
