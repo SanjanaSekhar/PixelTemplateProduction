@@ -140,13 +140,19 @@ bazel build $BAZEL_OPTS //tensorflow:install_headers
 
 ## Compiling and running 
 
+Activate the virtual environment that contains tensorflow:
+```
+source ~/.virtualenvs/tf_dev/bin/activate
+```
+This can later be deactivated with `deactivate`.
+
 Obtain the location of the header files to include, and the libraries to be linked:
 
 ```
 python -c 'import tensorflow as tf; print(" ".join(tf.sysconfig.get_compile_flags()))'
 python -c 'import tensorflow as tf; print(" ".join(tf.sysconfig.get_link_flags()))'
 ```
-Include the compile flags and link flags. Note, you need to include 2 shared libraries: `libtensorflow_framework.so.2` and `libtensorflow_cc.so.2`. (During compilation if some headers are not found you may have to include the directories containing those files specifically.)
+Include the compile flags and link flags in the makefile. Note, you need to include 2 shared libraries: `libtensorflow_framework.so.2` and `libtensorflow_cc.so.2`. (During compilation if some headers are not found you may have to include the directories containing those files specifically.)
 
 Additionally you would have to include the following link flags before the shared libraries:
 ```
@@ -156,8 +162,9 @@ After compilation, export `LD_LIBRARY_PATH` to point to the location of the shar
 ```
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path to .so files>
 ```
-To run the binary:
+To run the binary, move to a location that contains PIXELAV events and `pix_2t.proc`. Then perform:
 ```
+./bin/gen_xy_template
 ./bin/nn_gen_zp_template
 ```
 
