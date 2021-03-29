@@ -156,3 +156,8 @@ After compilation, export `LD_LIBRARY_PATH` to point to the location of the shar
 ```
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path to .so files>
 ```
+To run the binary:
+```
+./bin/nn_gen_zp_template
+```
+
