@@ -81,6 +81,8 @@ nfiles parameter (because it will only use one file). The second line has three
 parameters, the first is the file number of the template (the XXXXX) and the
 second is the `use_l1_offset` parameter, the third is the cross talk fraction. 
 
+**nn_gen_zp_template**: Runs neural network reco on pixelav events to get the resolution. Outputs one gen errors file named `generror_summary_nnzpXXXX.out`.
+
 An example `test_params.txt` config is:
 > 58606 150. 1600. 1600. 0.073 0.080 0.08 350. 0
 
@@ -123,7 +125,7 @@ export TF_NEED_TENSORRT=0
 export BAZEL_OPTS="--config=opt -c opt -s --verbose_failures -j 8 --config=noaws --config=nogcp --config=nohdfs --config=nonccl"
 bazel build $BAZEL_OPTS //tensorflow/tools/pip_package:build_pip_package
 ```
-- You may get an error saying that `/tmp/tensorflow_pkg/tensorflow-2.3.0-cp38-cp38-linux_x86_64.whl`. In such a case, recreate the wheel file in a different directory (within `tensorflow/` for example). If you obtain warnings saying certain header files are not found, you can ignore them.
+- You may get an error saying that `/tmp/tensorflow_pkg/tensorflow-2.3.0-cp38-cp38-linux_x86_64.whl` cannot be found/is not supported on your platform. In such a case, recreate the wheel file in a different directory (within `tensorflow/` for example). If you obtain warnings saying certain header files are not found, you can ignore them.
 - After testing the Python installation we can build targets for the C++ implementation.
 
 ```
