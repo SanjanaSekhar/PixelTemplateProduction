@@ -4,7 +4,7 @@
 
 //#include "template_utils.h"
 //#include "PhysicsTools/TensorFlow/interface/TensorFlow.h"
-#include <memory>
+//#include <memory>
 #include "tensorflow/core/framework/tensor.h"
 #include "tensorflow/core/lib/core/threadpool.h"
 #include "tensorflow/core/lib/io/path.h"
@@ -14,7 +14,7 @@
 #include "tensorflow/cc/saved_model/loader.h"
 #include "tensorflow/cc/saved_model/constants.h"
 #include "tensorflow/cc/saved_model/tag_constants.h"
-
+#include "tensorflow/core/platform/env.h"
 using namespace tensorflow;
 
 void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta, float& xrec, float& yrec)
@@ -25,24 +25,25 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
    sprintf(graph_y,"data/graph_y_%s.pb",graph_ext) ;
 
    printf("TXSIZE = %i\n", TXSIZE);
-   printf("TYSIZE = %i\n", TXSIZE);
+   printf("TYSIZE = %i\n", TYSIZE);
    
    sprintf(inputTensorName_,"input_1");
    sprintf(outputTensorName_,"Identity"); 
 
-   GraphDef* graphDef_x;
+   GraphDef graphDef_x;
   Session* session_x;
-  Status status = NewSession(SessionOptions(), &session_x);
+  Status status; SessionOptions sessionOptions;
+ status = NewSession(sessionOptions, &session_x);
   if (!status.ok()) {
     std::cout << status.ToString() << "\n";
-    print('Session x not okay');
+    //printf('Session x not okay');
   }
-  GraphDef* graphDef_y;
+  GraphDef graphDef_y;
   Session* session_y;
-  Status status = NewSession(SessionOptions(), &session_y);
+   status = NewSession(sessionOptions, &session_y);
   if (!status.ok()) {
     std::cout << status.ToString() << "\n";
-    print('Session y not okay');
+    //printf('Session y not okay');
   }
   std::vector<tensorflow::Tensor> output_x;
   std::vector<tensorflow::Tensor> output_y;
@@ -54,7 +55,7 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
 
   if (!status.ok()) {
     std::cout << status.ToString() << "\n";
-    print('Error in graph_x pb');
+   // printf('Error in graph_x pb');
   }
    // create a new session and add the graphDef
   status = session_x->Create(graphDef_x);
@@ -71,15 +72,15 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
   input_x.tensor<float,3>()(0, TXSIZE+1, 0) = cotbeta;
   // define the output and run
   
- status = session_x->Run({{inputTensorName_, input_x}}, {outputTensorName_}, &output_x);
+ status = session_x->Run({{inputTensorName_, input_x}}, {outputTensorName_}, {},&output_x);
 
   // print the output
   std::cout << "THIS IS THE FROM THE 1DCNN xrec -> " << output_x[0].matrix<float>()(0,0) << std::endl << std::endl;
   xrec = output_x[0].matrix<float>()(0,0);
 
   session_x->Close();
-  delete graphDef_x;
-  graphDef_x = nullptr;
+  //delete graphDef_x;
+  //graphDef_x = nullptr;
 
   //=========== infer y ====================
   // load the graph
@@ -87,7 +88,7 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
 
   if (!status.ok()) {
     std::cout << status.ToString() << "\n";
-    print('Error in reading graph_y');
+   // printf("Error in reading graph_y");
   }
    // create a new session and add the graphDef
   status = session_y->Create(graphDef_y);
@@ -104,15 +105,15 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
   input_y.tensor<float,3>()(0, TYSIZE+1, 0) = cotbeta;
 
   // define the output and run
- status = session_y->Run({{inputTensorName_, input_y}}, {outputTensorName_}, &output_y);
+ status = session_y->Run({{inputTensorName_, input_y}}, {outputTensorName_}, {},&output_y);
 
   // print the output
   std::cout << "THIS IS THE FROM THE 1DCNN yrec -> " << output_y[0].matrix<float>()(0,0) << std::endl << std::endl;
   yrec = output_y[0].matrix<float>()(0,0);
 
   session_y->Close();
-  delete graphDef_y;
-  graphDef_y = nullptr;
+  //delete graphDef_y;
+  //graphDef_y = nullptr;
 
 //  return 1;
 }

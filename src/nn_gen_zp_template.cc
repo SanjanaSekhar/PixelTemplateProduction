@@ -30,7 +30,7 @@
 
 #define TEMPL_DEBUG
 #include "template_utils.h"
-#include "nn_reco.cc"
+#include "nn_reco.h"
 
 
 // Main program  
@@ -1229,7 +1229,8 @@ int main(int argc, char *argv[])
                 }
             }
 //============================================ NN reco ===============================================================
-            printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
+          
+	    printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
             do_1dcnn_reco(cluster_local, cotalpha, cotbeta, xrec, yrec);
 
             float dx_1dcnn = xrec - xhit[n];
