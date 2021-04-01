@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     std::multiset<float> qmsort;
     static float fbin[] = {1.5, 1.0, 0.85}; //bins of charge in Q_cluster / Q_avg
 
-    const int nevents = 30000;
+    const int nevents = 10000;
 
     float xhit[nevents], yhit[nevents], cotalpha, cotbeta;
 
@@ -1230,12 +1230,13 @@ int main(int argc, char *argv[])
             }
 //============================================ NN reco ===============================================================
           
-	//printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
+	   printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
             do_1dcnn_reco(cluster_local, cotalpha, cotbeta, xrec, yrec);
 
             float dx_1dcnn = xrec - xhit[n];
             float dy_1dcnn = yrec - yhit[n];
 
+	    printf("dx = %f, dy = %f\n",dx_1dcnn,dy_1dcnn);
              hp[y_1dcnn_idx]->Fill(dy_1dcnn);
              hp[y_1dcnn_idx+1 +qbins[n]]->Fill(dy_1dcnn);
             

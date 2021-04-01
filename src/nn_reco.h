@@ -71,10 +71,10 @@ void do_1dcnn_reco(float cluster[TXSIZE][TYSIZE], float cotalpha, float cotbeta,
   input_x.tensor<float,3>()(0, TXSIZE, 0) = cotalpha;
   input_x.tensor<float,3>()(0, TXSIZE+1, 0) = cotbeta;
   // define the output and run
-  auto start = high_resolution_clock::now();
+  //auto start = high_resolution_clock::now();
  status = session_x->Run({{inputTensorName_, input_x}}, {outputTensorName_}, {},&output_x);
-auto stop = high_resolution_clock::now();
-	//printf("Inference time for x = %0.3f us",duration_cast<microseconds>(stop-start));
+//auto stop = high_resolution_clock::now();
+//	printf("Inference time for x = %f us",duration_cast<microseconds>(stop-start).count());
   // print the output
   //std::cout << "THIS IS THE FROM THE 1DCNN xrec -> " << output_x[0].matrix<float>()(0,0) << std::endl << std::endl;
   xrec = output_x[0].matrix<float>()(0,0);
