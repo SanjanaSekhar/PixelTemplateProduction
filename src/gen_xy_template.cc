@@ -40,7 +40,7 @@ Double_t fit_fn(Double_t *xs, Double_t *par){
 }
 
 
-void gen_xy_template(const int nevents = 30000, const int npt = 200, const int nprm = 5, 
+void gen_xy_template(const int nevents = 209998, const int npt = 200, const int nprm = 5, 
         const int maxarg = 5){
 
 
