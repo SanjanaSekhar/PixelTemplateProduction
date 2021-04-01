@@ -1568,22 +1568,34 @@ int main(int argc, char *argv[])
         sprintf(outfile0,"template_histos%5.5d.pdf[",ifile);
         sprintf(outfile1,"template_histos%5.5d.pdf",ifile);
         sprintf(outfile2,"template_histos%5.5d.pdf]",ifile);
+        // Create an array of histograms.
+        TObjArray Hlist(0);
+
         c1->Clear();
         c1->Print(outfile0);
         for(unsigned int i=0; i<hp.size(); ++i) {
             if(hp[i] == NULL) continue;
+            Hlist.Add(hp[i]);
             hp[i]->Draw();
             c1->Print(outfile1);
             c1->Clear();
         }
         for(unsigned int i=0; i<profs.size(); i++){
             if(profs[i] == NULL) continue;
+            Hlist.Add(profs[i]);
             profs[i]->Draw();
             c1->Print(outfile1);
             c1->Clear();
         }
         c1->Print(outfile2);
         c1->Clear();
+
+        // Open a ROOT file and write the array to the ROOT file.
+        TFile f("demo.root","RECREATE");
+        Hlist.Write();
+
+// Closing the ROOT file.
+   f.Close();
 
         delete slice;
     }
