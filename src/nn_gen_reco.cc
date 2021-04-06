@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     std::multiset<float> qmsort;
     static float fbin[] = {1.5, 1.0, 0.85}; //bins of charge in Q_cluster / Q_avg
 
-    const int nevents = 30000;
+    const int nevents = 30;
 
     float xhit[nevents], yhit[nevents], cotalpha, cotbeta;
 
@@ -260,53 +260,8 @@ int main(int argc, char *argv[])
     static vector<TProfile*> profs(n_profs);
     double chi_min[n_hists]; //chi2 minimum values, keep same indexing
 
-    hp[y_temp_idx + 0] = new TH1F("h201","dy_temp (all sig); #Deltay (#mum)",ny,-halfys,halfys);
-    hp[y_temp_idx + 1] = new TH1F("h202","dy_temp (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);      
-    hp[y_temp_idx + 2] = new TH1F("h203","dy_temp (1.5mn > signal > 1.0mn); #Deltay (#mum)",ny,-halfys,halfys);      
-    hp[y_temp_idx + 3] = new TH1F("h204","dy_temp (1.0mn > signal > 0.85mn); #Deltay (#mum)",ny,-halfys,halfys);     
-    hp[y_temp_idx + 4] = new TH1F("h205","dy_temp (0.85mn > signal); #Deltay (#mum)",ny,-halfys,halfys);      
 
-    hp[y_chi2_idx + 0] = new TH1F("h206","chi2 y_temp (single pix)",ny,0.,chimx);
-    hp[y_chi2_idx + 1] = new TH1F("h207","chi2 y_temp (signal > 1.5mn)",ny,0.,chimx);
-    hp[y_chi2_idx + 2] = new TH1F("h208","chi2 y_temp (1.5mn > signal > 1.0mn)",ny, 0., chimx);
-    hp[y_chi2_idx + 3] = new TH1F("h209","chi2 y_temp (1.0mn > signal > 0.85mn)",ny,0., chimx);
-    hp[y_chi2_idx + 4]=  new TH1F("h210","chi2 y_temp (0.85mn > signal)",ny,0.,chimx);
-
-    hp[x_temp_idx + 0] = new TH1F("h101","dx_temp (all sig); #Deltax (#mum)",nx,-halfxs,halfxs);
-    hp[x_temp_idx + 1] = new TH1F("h102","dx_temp (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
-    hp[x_temp_idx + 2] = new TH1F("h103","dx_temp (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
-    hp[x_temp_idx + 3] = new TH1F("h104","dx_temp (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
-    hp[x_temp_idx + 4] = new TH1F("h105","dx_temp (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
-
-    hp[x_chi2_idx + 0] = new TH1F("h106","chi2 x_temp (single pix)",nx,0.,chimx);
-    hp[x_chi2_idx + 1] = new TH1F("h107","chi2 x_temp (signal > 1.5mn)",nx,0.,chimx);
-    hp[x_chi2_idx + 2] = new TH1F("h108","chi2 x_temp (1.5mn > signal > 1.0mn)",nx, 0., chimx);
-    hp[x_chi2_idx + 3] = new TH1F("h109","chi2 x_temp (1.0mn > signal > 0.85mn)",nx,0., chimx);
-    hp[x_chi2_idx + 4]=  new TH1F("h110","chi2 x_temp (0.85mn > signal)",nx,0.,chimx);
-
-
-    hp[y_temp_fp_idx + 0] = new TH1F("h306","dy_temp first pass (all sig); #Deltay (#mum)",ny,-halfys,halfys);
-    hp[y_temp_fp_idx + 1] = new TH1F("h307","dy_temp first pass (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);      
-    hp[y_temp_fp_idx + 2] = new TH1F("h308","dy_temp first pass (1.5mn > signal > 1.0mn); #Deltay (#mum)",ny,-halfys,halfys);      
-    hp[y_temp_fp_idx + 3] = new TH1F("h309","dy_temp first pass (1.0mn > signal > 0.85mn); #Deltay (#mum)",ny,-halfys,halfys);     
-    hp[y_temp_fp_idx + 4] = new TH1F("h310","dy_temp first pass (0.85mn > signal); #Deltay (#mum)",ny,-halfys,halfys);      
-
-    hp[x_temp_fp_idx + 0] = new TH1F("h301","dx_temp first pass (all sig); #Deltax (#mum)",nx,-halfxs,halfxs);
-    hp[x_temp_fp_idx + 1] = new TH1F("h302","dx_temp first pass (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
-    hp[x_temp_fp_idx + 2] = new TH1F("h303","dx_temp first pass (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
-    hp[x_temp_fp_idx + 3] = new TH1F("h304","dx_temp first pass (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
-    hp[x_temp_fp_idx + 4] = new TH1F("h305","dx_temp first pass (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
-
-    hp[y_chi2_fp_idx + 0] = new TH1F("h510","chi2y_temp first pass, merged(signal > 1.5mn)",ny,0.,chimx);
-    hp[y_chi2_fp_idx + 1] = new TH1F("h511","chi2y_temp first pass, merged(1.5mn > signal > 1.0mn)",ny, 0., chimx);
-    hp[y_chi2_fp_idx + 2] = new TH1F("h512","chi2y_temp first pass, merged(1.0mn > signal > 0.85mn)",ny,0., chimx);
-    hp[y_chi2_fp_idx + 3] = new TH1F("h513","chi2y_temp first pass, merged(0.85mn > signal)",ny,0.,chimx);
-
-    hp[x_chi2_fp_idx + 0] = new TH1F("h506","chi2x_temp first pass, merged(signal > 1.5mn)",ny,0.,chimx);
-    hp[x_chi2_fp_idx + 1] = new TH1F("h507","chi2x_temp first pass, merged(1.5mn > signal > 1.0mn)",ny, 0., chimx);
-    hp[x_chi2_fp_idx + 2] = new TH1F("h508","chi2x_temp first pass, merged(1.0mn > signal > 0.85mn)",ny,0., chimx);
-    hp[x_chi2_fp_idx + 3] = new TH1F("h509","chi2x_temp first pass, merged(0.85mn > signal)",ny,0.,chimx);
-
+    
 
     hp[y_generic_idx + 0] = new TH1F("h406","dy_generic (all sig); #Deltay (#mum)",ny,-halfys,halfys);
     hp[y_generic_idx + 1] = new TH1F("h407","dy_generic (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);      
@@ -426,16 +381,6 @@ int main(int argc, char *argv[])
   status = session_y->Create(graphDef_y);
    // define a tensor and fill it with cluster projection
   tensorflow::Tensor input_y(tensorflow::DT_FLOAT, {1,TYSIZE+2,1});
-
-
-
-
-
-
-
-
-
-
 
     //========================================================================================
 
@@ -1312,13 +1257,14 @@ int main(int argc, char *argv[])
           input_x.tensor<float,3>()(0, TXSIZE, 0) = cotalpha;
           input_x.tensor<float,3>()(0, TXSIZE+1, 0) = cotbeta;
           // define the output and run
-          auto start = high_resolution_clock::now();
+         // auto start = high_resolution_clock::now();
          status = session_x->Run({{inputTensorName_, input_x}}, {outputTensorName_}, {},&output_x);
-         auto stop = high_resolution_clock::now();
+         //auto stop = high_resolution_clock::now();
             //printf("Inference time for x = %0.3f us",duration_cast<microseconds>(stop-start));
           // print the output
           //std::cout << "THIS IS THE FROM THE 1DCNN xrec -> " << output_x[0].matrix<float>()(0,0) << std::endl << std::endl;
           xrec = output_x[0].matrix<float>()(0,0);
+          printf("%f\n", xrec);
 
             for (size_t j = 0; j < TYSIZE; j++) {
             input_y.tensor<float,3>()(0, j, 0) = 0.;
