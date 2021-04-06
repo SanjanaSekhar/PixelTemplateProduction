@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     std::multiset<float> qmsort;
     static float fbin[] = {1.5, 1.0, 0.85}; //bins of charge in Q_cluster / Q_avg
 	printf("%s\n","HELLO");
-    const int nevents = 209998;
+    const int nevents = 20999;
 
     float xhit[nevents], yhit[nevents], cotalpha, cotbeta;
 
