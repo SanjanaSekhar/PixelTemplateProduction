@@ -1310,7 +1310,7 @@ int main(int argc, char *argv[])
             input_y.tensor<float,3>()(0, j, 0) = 0.;
             for (size_t i = 0; i < TXSIZE; i++){
                 //1D projection in x
-                input_y.tensor<float,3>()(0, j, 0) += cluster[i][j];
+                input_y.tensor<float,3>()(0, j, 0) += cluster_local[i][j];
                 //printf("j = %i, input_y = %0.3f\n",j,input_y.tensor<float,3>()(0, j, 0));
             }
           }
@@ -1346,7 +1346,12 @@ int main(int argc, char *argv[])
 
 
 
-
+             //grab 30th smallest charge (0.1%)
+        auto it = std::next(qmsort.begin(), 29);
+        float qmin30 = *it;
+        //grab 60th smallest charge (0.2%) 
+        it = std::next(qmsort.begin(), 59);
+        float qmin60 = *it;
 
 
 
