@@ -26,9 +26,11 @@
  *   Write integers for the templates
  */
 
+// Modifying to include NN_reco
+
 #define TEMPL_DEBUG
 #include "template_utils.h"
-
+//#include "nn_reco.h"
 
 
 // Main program  
@@ -51,7 +53,7 @@ int main(int argc, char *argv[])
 
     std::multiset<float> qmsort;
     static float fbin[] = {1.5, 1.0, 0.85}; //bins of charge in Q_cluster / Q_avg
-	printf("%s\n","HELLO");
+
     const int nevents = 30000;
 
     float xhit[nevents], yhit[nevents], cotalpha, cotbeta;
@@ -182,7 +184,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    sprintf(infile,"generror_summary_zp%5.5d.out",id);
+    sprintf(infile,"generror_summary_nnzp%5.5d.out",id);
     generr_output_file = fopen(infile, "w");
     if (generr_output_file==NULL) {
         printf("couldn't open generr output file/n");
@@ -228,10 +230,13 @@ int main(int argc, char *argv[])
     const int charge_idx = 50;
     const int y_chi2_fp_idx = 58;
     const int x_chi2_fp_idx = 62;
+    const int y_1dcnn_idx = 70;
+    const int x_1dcnn_idx = 75;
+
     const int y_corr_idx = 0;
     const int x_corr_idx = 5;
 
-    const int n_hists = 70;
+    const int n_hists = 90; // 70->90
     const int n_profs = 10;
 
 
@@ -299,7 +304,7 @@ int main(int argc, char *argv[])
     hp[x_generic_idx + 1] = new TH1F("h402","dx_generic (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
     hp[x_generic_idx + 2] = new TH1F("h403","dx_generic (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
     hp[x_generic_idx + 3] = new TH1F("h404","dx_generic (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
-    hp[x_generic_idx + 4] = new TH1F("h405","dx_generic (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_generic_idx + 4] = new TH1F("h405","dx_generic (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);    
 
 
     hp[charge_idx + 0] = new TH1F("h100","Number generated e",150,0.,500000.);	
@@ -310,6 +315,20 @@ int main(int argc, char *argv[])
     hp[charge_idx + 5] = new TH1F ("h504","npix(0.85mn > signal)",40,0.5,40.5);
     hp[charge_idx + 6] = new TH1F ("h505","2 Cluster Merged Charge",500,0.,1000000.);
     hp[charge_idx + 7] = new TH1F ("h606","measured Q/generated Q",300,0.,1.5);
+
+ //======= NNs =========   
+    hp[y_1dcnn_idx + 0] = new TH1F("h706","dy_1dcnn (all sig); #Deltay (#mum)",ny,-halfys,halfys);
+    hp[y_1dcnn_idx + 1] = new TH1F("h707","dy_1dcnn (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_1dcnn_idx + 2] = new TH1F("h708","dy_1dcnn (1.5mn > signal > 1.0mn); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_1dcnn_idx + 3] = new TH1F("h709","dy_1dcnn (1.0mn > signal > 0.85mn); #Deltay (#mum)",ny,-halfys,halfys);     
+    hp[y_1dcnn_idx + 4] = new TH1F("h710","dy_1dcnn (0.85mn > signal); #Deltay (#mum)",ny,-halfys,halfys);      
+
+    hp[x_1dcnn_idx + 0] = new TH1F("h701","dx_1dcnn (all sig); #Deltax (#mum)",nx,-halfxs,halfxs);
+    hp[x_1dcnn_idx + 1] = new TH1F("h702","dx_1dcnn (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_1dcnn_idx + 2] = new TH1F("h703","dx_1dcnn (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_1dcnn_idx + 3] = new TH1F("h704","dx_1dcnn (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
+    hp[x_1dcnn_idx + 4] = new TH1F("h705","dx_1dcnn (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
+//========================
 
     int nbins_prof = 10;
     profs[y_corr_idx + 0] = new TProfile("h211","dy vs qfl (all sig) ", nbins_prof, -1., 1., -50., 50.);
@@ -350,6 +369,61 @@ int main(int argc, char *argv[])
     //  Determine current time
 
     gettimeofday(&now0, &timz);
+
+
+    //==========================================================================================
+    // FOR NN RECO
+    char *graph_ext = "1dcnn_p1_mar9";
+   char graph_x[100],graph_y[100], inputTensorName_[100],outputTensorName_[100];
+   sprintf(graph_x,"data/graph_x_%s.pb",graph_ext);
+   sprintf(graph_y,"data/graph_y_%s.pb",graph_ext) ;
+
+   //printf("TXSIZE = %i\n", TXSIZE);
+   //printf("TYSIZE = %i\n", TYSIZE);
+   
+   sprintf(inputTensorName_,"input_1");
+   sprintf(outputTensorName_,"Identity"); 
+
+   GraphDef graphDef_x;
+  Session* session_x;
+  Status status; SessionOptions sessionOptions;
+ status = NewSession(sessionOptions, &session_x);
+
+  GraphDef graphDef_y;
+  Session* session_y;
+   status = NewSession(sessionOptions, &session_y);
+
+  std::vector<tensorflow::Tensor> output_x;
+  std::vector<tensorflow::Tensor> output_y;
+
+ 
+  //=========== infer x ====================
+  // load the graph
+   status = ReadBinaryProto(Env::Default(), graph_x, &graphDef_x);
+   // create a new session and add the graphDef
+  status = session_x->Create(graphDef_x);
+   // define a tensor and fill it with cluster projection
+  tensorflow::Tensor input_x(tensorflow::DT_FLOAT, {1,TXSIZE+2,1});
+
+ //=========== infer y ====================
+  // load the graph
+   status = ReadBinaryProto(Env::Default(), graph_y, &graphDef_y);
+   // create a new session and add the graphDef
+  status = session_y->Create(graphDef_y);
+   // define a tensor and fill it with cluster projection
+  tensorflow::Tensor input_y(tensorflow::DT_FLOAT, {1,TYSIZE+2,1});
+
+
+
+
+
+
+
+
+
+
+
+    //========================================================================================
 
     // Loop over angle pair runs
 
@@ -483,7 +557,7 @@ int main(int argc, char *argv[])
 
 
 
-        sprintf(infile,"template_events_d%05i.out",ifile);
+        sprintf(infile,"template_events_d%05i_temp.out",ifile);
 
         printf("opening file %s to get pixel events \n", infile);
 
@@ -1195,7 +1269,6 @@ int main(int argc, char *argv[])
                 hp[x_generic_idx+1 +qbins[n]]->Fill(dx_gen);
             }
 
-//======================================================================================================
 
 
             // Do first round of template reco on the cluster without charge
@@ -1210,340 +1283,78 @@ int main(int argc, char *argv[])
                     cluster_local[i][j] = cluster[n][i][j];
                 }
             }
+//============================================ NN reco ===============================================================
+          
+	//printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
+          //  do_1dcnn_reco(cluster_local, cotalpha, cotbeta, xrec, yrec);
 
+            for (size_t i = 0; i < TXSIZE; i++) {
+            input_x.tensor<float,3>()(0, i, 0) = 0;
+            for (size_t j = 0; j < TYSIZE; j++){
+                //1D projection in x
+                input_x.tensor<float,3>()(0, i, 0) += cluster_local[i][j];
+            }
+          }
+          input_x.tensor<float,3>()(0, TXSIZE, 0) = cotalpha;
+          input_x.tensor<float,3>()(0, TXSIZE+1, 0) = cotbeta;
+          // define the output and run
+          auto start = high_resolution_clock::now();
+         status = session_x->Run({{inputTensorName_, input_x}}, {outputTensorName_}, {},&output_x);
+         auto stop = high_resolution_clock::now();
+            //printf("Inference time for x = %0.3f us",duration_cast<microseconds>(stop-start));
+          // print the output
+          //std::cout << "THIS IS THE FROM THE 1DCNN xrec -> " << output_x[0].matrix<float>()(0,0) << std::endl << std::endl;
+          xrec = output_x[0].matrix<float>()(0,0);
 
+            for (size_t j = 0; j < TYSIZE; j++) {
+            input_y.tensor<float,3>()(0, j, 0) = 0.;
+            for (size_t i = 0; i < TXSIZE; i++){
+                //1D projection in x
+                input_y.tensor<float,3>()(0, j, 0) += cluster[i][j];
+                //printf("j = %i, input_y = %0.3f\n",j,input_y.tensor<float,3>()(0, j, 0));
+            }
+          }
+          input_y.tensor<float,3>()(0, TYSIZE, 0) = cotalpha;
+          input_y.tensor<float,3>()(0, TYSIZE+1, 0) = cotbeta;
 
-            //        if(fabs(cotbeta) < 2.1) continue;
-            // Do the template analysis on the cluster 
-            SiPixelTemplateReco::ClusMatrix clusterPayload{&cluster_local[0][0], xdouble, ydouble, mrow,mcol};
+          // define the output and run
+         status = session_y->Run({{inputTensorName_, input_y}}, {outputTensorName_}, {},&output_y);
 
+          // print the output
+        //std::cout << "THIS IS THE FROM THE 1DCNN yrec -> " << output_y[0].matrix<float>()(0,0) << std::endl << std::endl;
+          yrec = output_y[0].matrix<float>()(0,0);
 
-            int speed = 0;
-            int qbin;
+            float dx_1dcnn = xrec - xhit[n];
+            float dy_1dcnn = yrec - yhit[n];
 
+             hp[y_1dcnn_idx]->Fill(dy_1dcnn);
+             hp[y_1dcnn_idx+1 +qbins[n]]->Fill(dy_1dcnn);
+            
+             hp[x_1dcnn_idx]->Fill(dx_1dcnn);
+             hp[x_1dcnn_idx+1 +qbins[n]]->Fill(dx_1dcnn);
+            
 
-            int ierr = PixelTempReco1D(tempID, cotalpha, cotbeta, locBz, locBx,  clusterPayload, templ, yrec, sigmay, proby, xrec, sigmax, probx,  qbin, speed, probQ);
-            if(ierr != 0) {
-                printf("First pass reconstruction failed with error %d \n", ierr);
-                printf("cluster \n");
-                print_cluster(cluster[n]);
-            } else {
-                //coordinates returned based origin being center of first
-                //pixel in template
-                //hit positions based on center of central pixel in template
-                dy = yrec - (TYSIZE/2)*ysize - yhit[n];
-                dx = xrec - (TXSIZE/2)*xsize - xhit[n];
-
-                double ndf = 0.1; //set in template sideload by chi2 avg param
-                double chisq_y = ROOT::Math::chisquared_quantile_c(proby, ndf);
-                double chisq_x = ROOT::Math::chisquared_quantile_c(probx, ndf);
-
-                if(qbin != qbins[n]){
-                    printf("WARNING qbins disagree !!!. Local is %i Template is %i \n", qbins[n], qbin);
-
-                }
-                //Fill first pass template reco residuals
-                if(ywidth[n] > 1){
-                    hp[y_temp_fp_idx]->Fill(dy);
-                    hp[y_temp_fp_idx+1+qbin]->Fill(dy);
-                    profs[y_corr_idx]->Fill(qfly[n], dy);
-                    profs[y_corr_idx+1+qbins[n]]->Fill(qfly[n], dy);
-
-                    hp[y_chi2_fp_idx+qbin_merge[n]]->Fill(chisq_y); 
-                    chi_min[y_chi2_fp_idx + qbin_merge[n]] = std::min(chisq_y, chi_min[y_chi2_fp_idx + qbin_merge[n]]);
-
-                }
-
-                if(xwidth[n] > 1){
-                    hp[x_temp_fp_idx]->Fill(dx);
-                    hp[x_temp_fp_idx+1+qbin]->Fill(dx);
-                    //charge loss vs reidual profiles
-                    profs[x_corr_idx]->Fill(qflx[n], dx);
-                    profs[x_corr_idx+1+qbins[n]]->Fill(qflx[n], dx);
-
-                    hp[x_chi2_fp_idx+qbin_merge[n]]->Fill(chisq_x);
-                    chi_min[x_chi2_fp_idx + qbin_merge[n]] = std::min(chisq_x, chi_min[x_chi2_fp_idx + qbin_merge[n]]);
-                }
-
-
-
-                //merged cluster qbin first pass chi2
-
+//======================================================================================================
+          
 
             }
-        }
+        
 
+        
 
-        //Compute charge loss correction and add it to the template
-        fit_pol5(profs[x_corr_idx]);
-        fit_pol5(profs[y_corr_idx]);
-
-        std::vector<float> x_corr_pars, y_corr_pars;
-        for(int i=0; i<4; i++){
-            x_corr_pars = fit_pol5(profs[x_corr_idx+1+i]);
-            y_corr_pars = fit_pol5(profs[y_corr_idx+1+i]);
-            for(int j=0; j<6; j++){
-                slice->yflpar[i][j] = y_corr_pars[j];
-                slice->xflpar[i][j] = x_corr_pars[j];
-            }
-        }
-
-
-        templ.sideload(slice, IDtype, locBx, locBz, lorwdy, lorwdx, q50, fbin, xsize, ysize, thick);
-
-        //do second round of template fits with charge loss correction
-        for(int n=0; n<read_events; n++){
-            if(!good_clust[n]) continue;
-
-            float cluster_local[TXSIZE][TYSIZE];
-            memset(cluster_local, 0., sizeof(cluster_local));
-            for(int i=0; i<TXSIZE; i++){
-                for(int j=0; j<TYSIZE; j++){
-                    cluster_local[i][j] = cluster[n][i][j];
-                }
-            }
-
-
-
-
-            //        if(fabs(cotbeta) < 2.1) continue;
-            // Do the template analysis on the cluster 
-            SiPixelTemplateReco::ClusMatrix clusterPayload{&cluster_local[0][0], xdouble, ydouble, mrow,mcol};
-
-
-            int speed = 0;
-            int qbin;
-
-
-            int ierr = PixelTempReco1D(tempID, cotalpha, cotbeta, locBz, locBx,  clusterPayload, templ, yrec, sigmay, proby, xrec, sigmax, probx,  qbin, speed, probQ);
-            if(ierr != 0) {
-                ++nbad; 
-                printf("2nd pass reconstruction failed with error %d \n", ierr);
-            } else {
-                ngood++;
-
-                //coordinates returned based origin being center of first
-                //pixel in template
-                //hit positions based on center of central pixel in template
-                dy = yrec - (TYSIZE/2)*ysize - yhit[n];
-                dx = xrec - (TXSIZE/2)*xsize - xhit[n];
-
-                if(qbin != qbins[n]){
-                    printf("WARNING qbins disagree !!!. Local is %i Template is %i \n", qbins[n], qbin);
-                }
-                // fill Chisq from template fit
-                double ndf = 0.1; //set in template sideload by chi2 avg param
-                double chisq_y = ROOT::Math::chisquared_quantile_c(proby, ndf);
-                double chisq_x = ROOT::Math::chisquared_quantile_c(probx, ndf);
-                //double re_prob = 1. - TMath::Gamma(ndf/2., chisq_y/2.);
-                //printf("proby, re_prob, Chi sq : %.4f %.4f %.4f \n", proby, re_prob, chisq_y);
-
-                hp[charge_idx+2+qbin]->Fill(npix[n]);
-
-                if(ywidth[n] == 1){
-                    hp[y_chi2_idx]->Fill(chisq_y); //single pixel chi2
-                    chi_min[y_chi2_idx] = std::min(chisq_y, chi_min[y_chi2_idx]);
-                }
-                else{
-
-                    //Fill final template reco residuals 
-                    hp[y_temp_idx]->Fill(dy);
-                    hp[y_temp_idx+1+qbin]->Fill(dy);
-                    hp[y_chi2_idx+1+qbin]->Fill(chisq_y); //qbin chisq
-                    chi_min[y_chi2_idx+1+qbin] = std::min(chisq_y, chi_min[y_chi2_idx+1+qbin]);
-                }
-
-                if(xwidth[n] ==1){
-                    hp[x_chi2_idx]->Fill(chisq_x); 
-                    chi_min[x_chi2_idx] = std::min(chisq_x, chi_min[x_chi2_idx]);
-                }
-                else{
-                    hp[x_temp_idx]->Fill(dx);
-                    hp[x_temp_idx+1+qbin]->Fill(dx);
-
-                    hp[x_chi2_idx+1+qbin]->Fill(chisq_x);
-                    chi_min[x_chi2_idx+1+qbin] = std::min(chisq_x, chi_min[x_chi2_idx+1+qbin]);
-                }
-
-
-                /*
-                   int k= int(xhit[n]/xsize * 8. + 4.5);
-                   int l= int(yhit[n]/ysize * 8. + 4.5);
-                   printf("Hit bins %i %i \n", k,l);
-                   printf("template dx dy %.3f %.3f \n", dx,dy);
-                   printf("generic dx dy %.3f %.3f \n", dx_gen,dy_gen);
-                   */
-
-            }
-
-        }
-
-        printf(" low q failures = %.0f, failed fits = %d, successful fits = %d, total read events %d \n", nqbin[4], nbad, ngood, read_events);	   
-
-        /*
-           printf("chi sq: \n");
-           for(int i=0; i< 40; i++){
-           printf("%.2f ", chi_min[i]);
-           }
-           */
+      
 
 
 
 
 
 
-        // Write this template entry to the output file
-        //
-        fprintf(temp_output_file, "%i %8.6f %8.6f %8.6f \n", ifile, slice->costrk[0], slice->costrk[1], slice->costrk[2]);
-
-        fprintf(temp_output_file, "%.1f %.1f %.1f %.1f %.1f %.1f %.1f %.1f \n",
-                qavg, pixmax, symax, dyone, syone, sxmax, dxone, sxone);
-        //grab 30th smallest charge (0.1%)
-        auto it = std::next(qmsort.begin(), 29);
-        float qmin30 = *it;
-        //grab 60th smallest charge (0.2%) 
-        it = std::next(qmsort.begin(), 59);
-        float qmin60 = *it;
-
-        fprintf(temp_output_file, "%.1f %.1f %.1f %.1f %.1f %.2f %.2f \n",
-                dytwo, sytwo, dxtwo, sxtwo, qmin30, clslny, clslnx );
-
-        //y charge variance fit
-        for(int i=0; i<2; i++){
-            for(int j=0; j<5; j++){
-                fprintf(temp_output_file, "%15.8E ", slice->ypar[i][j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
-        //y template
-        for(int k = 0; k < 9; k++){
-            for(int j=0; j<TYSIZE; j++){
-                fprintf(temp_output_file, "%8.1f ", slice->ytemp[k][j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
-
-        //x charge variance fit
-        for(int i=0; i<2; i++){
-            for(int j=0; j<5; j++){
-                fprintf(temp_output_file, "%15.8E ", slice->xpar[i][j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
-        //x template
-        for(int k = 0; k < 9; k++){
-            for(int j=0; j<TXSIZE; j++){
-                fprintf(temp_output_file, "%8.1f ", slice->xtemp[k][j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
 
 
-        //y template reisduals info
-        for(int i=0; i<4; i++){
-            auto pars = get_gaussian_pars(hp[y_temp_idx +1 +i], minErrY);
-            for(int j=0; j<4; j++){
-                fprintf(temp_output_file, "%9.1f ", pars[j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
-        //y charge loss correction
-        for(int i = 0; i < 4; i++){
-            for(int j=0; j<6; j++){
-                fprintf(temp_output_file, "%15.8E ", slice->yflpar[i][j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
 
-        //x template reisduals info
-        for(int i=0; i<4; i++){
-            auto pars = get_gaussian_pars(hp[x_temp_idx +1 +i], minErrX);
-            for(int j=0; j<4; j++){
-                fprintf(temp_output_file, "%9.1f ", pars[j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
-        //x charge loss correction
-        for(int i = 0; i < 4; i++){
-            for(int j=0; j<6; j++){
-                fprintf(temp_output_file, "%15.8E ", slice->xflpar[i][j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
+       
 
-        //chi-squared template fit info
-        for(int i=0; i<4; i++){
-            auto chiy_pars = get_chi2_pars(hp[y_chi2_idx + 1 +i], chi_min[y_chi2_idx + 1 +i]);
-            auto chix_pars = get_chi2_pars(hp[x_chi2_idx + 1 +i], chi_min[x_chi2_idx + 1 +i]);
-            fprintf(temp_output_file, "%9.3f %9.3f %9.3f %9.3f \n", 
-                    chiy_pars[0], chiy_pars[1], chix_pars[0], chix_pars[1]);
-        }
-
-        //y first pass temp fit avg and std dev + chi2 of merged clusters
-        for(int i=0; i<4; i++){
-            auto chiy_pars = get_chi2_pars(hp[y_chi2_fp_idx + i], chi_min[y_chi2_fp_idx + i]);
-            auto temp_pars = get_gaussian_pars(hp[y_temp_fp_idx +1 +i], minErrY);
-            fprintf(temp_output_file, "%9.1f %9.1f %9.3f %9.3f \n", 
-                    temp_pars[0], temp_pars[1], chiy_pars[0], chiy_pars[1]);
-        }
-        //x first pass temp fit avg and std dev + chi2 of merged clusters
-        for(int i=0; i<4; i++){
-            auto chix_pars = get_chi2_pars(hp[x_chi2_fp_idx + i], chi_min[x_chi2_fp_idx +i]);
-            auto temp_pars = get_gaussian_pars(hp[x_temp_fp_idx +1 +i], minErrX);
-            fprintf(temp_output_file, "%9.1f %9.1f %9.3f %9.3f \n", 
-                    temp_pars[0], temp_pars[1], chix_pars[0], chix_pars[1]);
-        }
-
-
-        //y generic reisduals info
-        for(int i=0; i<4; i++){
-            auto pars = get_gaussian_pars(hp[y_generic_idx +1 +i], minErrY);
-            for(int j=0; j<4; j++){
-                fprintf(temp_output_file, "%9.1f ", pars[j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
-
-        //x generic reisduals info
-        for(int i=0; i<4; i++){
-            auto pars = get_gaussian_pars(hp[x_generic_idx +1 +i], minErrX);
-            for(int j=0; j<4; j++){
-                fprintf(temp_output_file, "%9.1f ", pars[j]);
-            }
-            fprintf(temp_output_file, "\n");
-        }
-
-
-        //calculate q bin fractions
-        float tqbin = nqbin[0] + nqbin[1] + nqbin[2] + nqbin[3]; //exclude low-q failures
-        float fqbin[4];
-        for(int i=0; i<4; i++){
-            fqbin[i] = nqbin[i]/tqbin;
-        }
-
-        float fyone = float(nyone)/float(nevents);
-        float fxone = float(nxone)/float(nevents);
-        float fytwo = float(nytwo)/2./float(nevents);
-        float fxtwo = float(nxtwo)/2./float(nevents);
-
-        //single pixel chi2 info
-        auto chiy_pars = get_chi2_pars(hp[y_chi2_idx], chi_min[y_chi2_idx]);
-        auto chix_pars = get_chi2_pars(hp[x_chi2_idx], chi_min[x_chi2_idx]);
-        fprintf(temp_output_file, "%9.3f %9.3f %9.3f %9.3f ", chiy_pars[0], chiy_pars[1], chix_pars[0], chix_pars[1]);
-
-        //qmin2, vavilov fit params, charge ratio and extra param
-        auto vav_pars1 = get_vavilov_pars(hp[charge_idx + 1]);
-        float avg_qratio = hp[charge_idx + 7]->GetMean();
-
-        fprintf(temp_output_file, "%8.1f %8.1f %8.1f %8.5f %8.5f %8.1f \n", 
-                qmin60, vav_pars1[0], vav_pars1[1], vav_pars1[2], avg_qratio, 1.0  );
-
-
-        //2nd vavilov fit, qbin fractions and single pixel fractions
-        auto vav_pars2 = get_vavilov_pars(hp[charge_idx + 6]);
-        fprintf(temp_output_file,"%9.1f %9.1f %8.5f %8.5f %8.5f %8.5f %8.5f %8.5f %8.5f %8.5f \n", 
-                vav_pars2[0], vav_pars2[1], vav_pars2[2], fqbin[0], fqbin[1], fqbin[2],
-                fyone, fxone, fytwo, fxtwo);
+        
 
 
         //output to gen_errors
@@ -1557,9 +1368,12 @@ int main(int argc, char *argv[])
                 dytwo, sytwo, dxtwo, sxtwo, qmin30, qmin60);
 
         //x and y generic reisduals info
+        //USING THE NN RESIDUALS INSTEAD
         for(int i=0; i<4; i++){
-            auto y_pars = get_gaussian_pars(hp[y_generic_idx +1 +i], minErrY);
-            auto x_pars = get_gaussian_pars(hp[x_generic_idx +1 +i], minErrX);
+            //auto y_pars = get_gaussian_pars(hp[y_generic_idx +1 +i], minErrY);
+            //auto x_pars = get_gaussian_pars(hp[x_generic_idx +1 +i], minErrX);
+            auto y_pars = get_gaussian_pars(hp[y_1dcnn_idx +1 +i], minErrY);
+            auto x_pars = get_gaussian_pars(hp[x_1dcnn_idx +1 +i], minErrX);
             fprintf(generr_output_file, "%9.1f %9.1f %9.1f %9.1f \n", 
                     y_pars[0], y_pars[1], x_pars[0], x_pars[1]);
         }
@@ -1568,21 +1382,16 @@ int main(int argc, char *argv[])
         sprintf(outfile0,"template_histos%5.5d.pdf[",ifile);
         sprintf(outfile1,"template_histos%5.5d.pdf",ifile);
         sprintf(outfile2,"template_histos%5.5d.pdf]",ifile);
-        // Create an array of histograms.
-        TObjArray Hlist(0);
-
         c1->Clear();
         c1->Print(outfile0);
         for(unsigned int i=0; i<hp.size(); ++i) {
             if(hp[i] == NULL) continue;
-            Hlist.Add(hp[i]);
             hp[i]->Draw();
             c1->Print(outfile1);
             c1->Clear();
         }
         for(unsigned int i=0; i<profs.size(); i++){
             if(profs[i] == NULL) continue;
-            Hlist.Add(profs[i]);
             profs[i]->Draw();
             c1->Print(outfile1);
             c1->Clear();
@@ -1590,16 +1399,12 @@ int main(int argc, char *argv[])
         c1->Print(outfile2);
         c1->Clear();
 
-        // Open a ROOT file and write the array to the ROOT file.
-        TFile f("demo.root","RECREATE");
-        Hlist.Write();
-
-// Closing the ROOT file.
-   f.Close();
-
         delete slice;
     }
     // Close output files
+
+    session_x->Close();
+    session_y->Close();
 
     fclose(temp_output_file);  
     fclose(generr_output_file);  
