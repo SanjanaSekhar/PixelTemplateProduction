@@ -32,6 +32,20 @@
 #include "template_utils.h"
 //#include "nn_reco.h"
 
+#include "tensorflow/core/framework/tensor.h"
+#include "tensorflow/core/lib/core/threadpool.h"
+#include "tensorflow/core/lib/io/path.h"
+#include "tensorflow/core/public/session.h"
+#include "tensorflow/core/util/tensor_bundle/naming.h"
+#include "tensorflow/cc/client/client_session.h"
+#include "tensorflow/cc/saved_model/loader.h"
+#include "tensorflow/cc/saved_model/constants.h"
+#include "tensorflow/cc/saved_model/tag_constants.h"
+#include "tensorflow/core/platform/env.h"
+#include <chrono>
+using namespace std::chrono;
+
+using namespace tensorflow;
 
 // Main program  
 
