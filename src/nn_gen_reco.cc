@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     FILE *temp_output_file, *generr_output_file;
 
-    struct timeval now0, now1;
+    struct timeval now0, now1, t_1dcnn1,t_1dcnn2;
     struct timezone timz;
     long deltas, deltaus;
     double deltat;
@@ -342,15 +342,18 @@ int main(int argc, char *argv[])
 
     //==========================================================================================
     // FOR NN RECO
-    char *graph_ext = "1dcnn_p1_mar9";
-   char graph_x[100],graph_y[100], inputTensorName_[100],outputTensorName_[100];
+    char *graph_ext = "1dcnn_p1_apr12";
+   char graph_x[100],graph_y[100], inputTensorName_x[100], anglesTensorName_x[100],inputTensorName_y[100], anglesTensorName_y[100],outputTensorName_[100];
    sprintf(graph_x,"data/graph_x_%s.pb",graph_ext);
    sprintf(graph_y,"data/graph_y_%s.pb",graph_ext) ;
 
    //printf("TXSIZE = %i\n", TXSIZE);
    //printf("TYSIZE = %i\n", TYSIZE);
    
-   sprintf(inputTensorName_,"input_1");
+   sprintf(inputTensorName_x,"input_1");
+   sprintf(anglesTensorName_x,"input_2");
+   sprintf(inputTensorName_y,"input_3");
+   sprintf(anglesTensorName_y,"input_4");
    sprintf(outputTensorName_,"Identity"); 
 
    GraphDef graphDef_x;
@@ -372,7 +375,7 @@ int main(int argc, char *argv[])
    // create a new session and add the graphDef
   status = session_x->Create(graphDef_x);
    // define a tensor and fill it with cluster projection
-  tensorflow::Tensor input_x(tensorflow::DT_FLOAT, {1,TXSIZE+2,1});
+  tensorflow::Tensor cluster_flat_x(tensorflow::DT_FLOAT, {1,TXSIZE,1});
 
  //=========== infer y ====================
   // load the graph
@@ -380,7 +383,10 @@ int main(int argc, char *argv[])
    // create a new session and add the graphDef
   status = session_y->Create(graphDef_y);
    // define a tensor and fill it with cluster projection
-  tensorflow::Tensor input_y(tensorflow::DT_FLOAT, {1,TYSIZE+2,1});
+  tensorflow::Tensor cluster_flat_y(tensorflow::DT_FLOAT, {1,TYSIZE,1});
+
+  // angles
+  tensorflow::Tensor angles(tensorflow::DT_FLOAT, {1,2,1});
 
     //========================================================================================
 
@@ -1230,11 +1236,6 @@ int main(int argc, char *argv[])
 
 
 
-            // Do first round of template reco on the cluster without charge
-            // loss correction
-
-
-
             float cluster_local[TXSIZE][TYSIZE];
             memset(cluster_local, 0., sizeof(cluster_local));
             for(int i=0; i<TXSIZE; i++){
@@ -1246,19 +1247,20 @@ int main(int argc, char *argv[])
           
 	//printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
           //  do_1dcnn_reco(cluster_local, cotalpha, cotbeta, xrec, yrec);
+            angles.tensor<float,3>()(0, 0, 0) = cotalpha;
+           angles.tensor<float,3>()(0, 1, 0) = cotbeta;
 
             for (size_t i = 0; i < TXSIZE; i++) {
-            input_x.tensor<float,3>()(0, i, 0) = 0;
+            cluster_flat_x.tensor<float,3>()(0, i, 0) = 0;
             for (size_t j = 0; j < TYSIZE; j++){
                 //1D projection in x
-                input_x.tensor<float,3>()(0, i, 0) += cluster_local[i][j];
+                cluster_flat_x.tensor<float,3>()(0, i, 0) += cluster_local[i][j];
             }
           }
-          input_x.tensor<float,3>()(0, TXSIZE, 0) = cotalpha;
-          input_x.tensor<float,3>()(0, TXSIZE+1, 0) = cotbeta;
+          
           // define the output and run
          // auto start = high_resolution_clock::now();
-         status = session_x->Run({{inputTensorName_, input_x}}, {outputTensorName_}, {},&output_x);
+         status = session_x->Run({{{inputTensorName_x,anglesTensorName_x}, {cluster_flat_x,angles}}}, {outputTensorName_}, {},&output_x);
          //auto stop = high_resolution_clock::now();
             //printf("Inference time for x = %0.3f us",duration_cast<microseconds>(stop-start));
           // print the output
@@ -1267,20 +1269,23 @@ int main(int argc, char *argv[])
           printf("%f\n", xrec);
 
             for (size_t j = 0; j < TYSIZE; j++) {
-            input_y.tensor<float,3>()(0, j, 0) = 0.;
+            cluster_flat_y.tensor<float,3>()(0, j, 0) = 0.;
             for (size_t i = 0; i < TXSIZE; i++){
                 //1D projection in x
-                input_y.tensor<float,3>()(0, j, 0) += cluster_local[i][j];
-                //printf("j = %i, input_y = %0.3f\n",j,input_y.tensor<float,3>()(0, j, 0));
+                cluster_flat_y.tensor<float,3>()(0, j, 0) += cluster_local[i][j];
+                
             }
           }
-          input_y.tensor<float,3>()(0, TYSIZE, 0) = cotalpha;
-          input_y.tensor<float,3>()(0, TYSIZE+1, 0) = cotbeta;
-
+          
+          gettimeofday(&t_1dcnn1, &timz);
           // define the output and run
-         status = session_y->Run({{inputTensorName_, input_y}}, {outputTensorName_}, {},&output_y);
-
-          // print the output
+         status = session_y->Run({{{inputTensorName_y,anglesTensorName_y}, {cluster_flat_y,angles}}}, {outputTensorName_}, {},&output_y);
+         gettimeofday(&t_1dcnn2, &timz);
+        
+        
+        
+        printf("ellapsed time for 1 cluster = %f seconds \n", t_1dcnn2.tv_usec - t_1dcnn1.tv_usec);
+              // print the output
         //std::cout << "THIS IS THE FROM THE 1DCNN yrec -> " << output_y[0].matrix<float>()(0,0) << std::endl << std::endl;
           yrec = output_y[0].matrix<float>()(0,0);
 
@@ -1298,28 +1303,13 @@ int main(int argc, char *argv[])
           
 
             }
-        
-
-        
-
       
-
-
-
              //grab 30th smallest charge (0.1%)
         auto it = std::next(qmsort.begin(), 29);
         float qmin30 = *it;
         //grab 60th smallest charge (0.2%) 
         it = std::next(qmsort.begin(), 59);
         float qmin60 = *it;
-
-
-
-
-
-       
-
-        
 
 
         //output to gen_errors
@@ -1344,9 +1334,9 @@ int main(int argc, char *argv[])
         }
 
         // Make plots 
-        sprintf(outfile0,"template_histos%5.5d.pdf[",ifile);
-        sprintf(outfile1,"template_histos%5.5d.pdf",ifile);
-        sprintf(outfile2,"template_histos%5.5d.pdf]",ifile);
+        sprintf(outfile0,"plots/template_histos%5.5d.pdf[",ifile);
+        sprintf(outfile1,"plots/template_histos%5.5d.pdf",ifile);
+        sprintf(outfile2,"plots/template_histos%5.5d.pdf]",ifile);
         c1->Clear();
         c1->Print(outfile0);
         for(unsigned int i=0; i<hp.size(); ++i) {
