@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
   tensorflow::Tensor cluster_flat_y(tensorflow::DT_FLOAT, {1,TYSIZE,1});
 
   // angles
-  tensorflow::Tensor angles(tensorflow::DT_FLOAT, {1,2,1});
+  tensorflow::Tensor angles(tensorflow::DT_FLOAT, {1,2});
 
     //========================================================================================
 
@@ -1247,9 +1247,9 @@ int main(int argc, char *argv[])
           
 	//printf("\n ===================GOING TO ENTER nn_reco=======================\n ");
           //  do_1dcnn_reco(cluster_local, cotalpha, cotbeta, xrec, yrec);
-            angles.tensor<float,3>()(0, 0, 0) = cotalpha;
-           angles.tensor<float,3>()(0, 1, 0) = cotbeta;
-
+            angles.tensor<float,2>()(0, 0) = cotalpha;
+           angles.tensor<float,2>()(0, 1) = cotbeta;
+printf("%s\n","starting x reco");
             for (size_t i = 0; i < TXSIZE; i++) {
             cluster_flat_x.tensor<float,3>()(0, i, 0) = 0;
             for (size_t j = 0; j < TYSIZE; j++){
@@ -1257,10 +1257,10 @@ int main(int argc, char *argv[])
                 cluster_flat_x.tensor<float,3>()(0, i, 0) += cluster_local[i][j];
             }
           }
-          
+          printf("%s\n","starting x Run");
           // define the output and run
          // auto start = high_resolution_clock::now();
-         status = session_x->Run({{{inputTensorName_x,anglesTensorName_x}, {cluster_flat_x,angles}}}, {outputTensorName_}, {},&output_x);
+         status = session_x->Run({{inputTensorName_x,cluster_flat_x}, {anglesTensorName_x,angles}}, {outputTensorName_}, {},&output_x);
          //auto stop = high_resolution_clock::now();
             //printf("Inference time for x = %0.3f us",duration_cast<microseconds>(stop-start));
           // print the output
@@ -1279,7 +1279,7 @@ int main(int argc, char *argv[])
           
           gettimeofday(&t_1dcnn1, &timz);
           // define the output and run
-         status = session_y->Run({{{inputTensorName_y,anglesTensorName_y}, {cluster_flat_y,angles}}}, {outputTensorName_}, {},&output_y);
+         status = session_y->Run({{inputTensorName_y,cluster_flat_y}, {anglesTensorName_y,angles}}, {outputTensorName_}, {},&output_y);
          gettimeofday(&t_1dcnn2, &timz);
         
         
