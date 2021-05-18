@@ -81,7 +81,7 @@ nfiles parameter (because it will only use one file). The second line has three
 parameters, the first is the file number of the template (the XXXXX) and the
 second is the `use_l1_offset` parameter, the third is the cross talk fraction. 
 
-**nn_gen_zp_template**: Runs neural network reco on pixelav events to get the resolution. Outputs one gen errors file named `generror_summary_nnzpXXXX.out`.
+**nn_gen_reco**: Runs neural network reco on pixelav events to get the resolution. Outputs one gen errors file named `generror_summary_nnzpXXXX.out`. Currently only has support for the 1dCNN.
 
 An example `test_params.txt` config is:
 > 58606 150. 1600. 1600. 0.073 0.080 0.08 350. 0
@@ -167,6 +167,6 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<path to .so files>
 To run the binary, move to a location that contains PIXELAV events and `pix_2t.proc`. Then perform:
 ```
 ./bin/gen_xy_template
-./bin/nn_gen_zp_template
+./bin/nn_gen_reco
 ```
 
