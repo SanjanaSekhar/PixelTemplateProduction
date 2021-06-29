@@ -232,10 +232,10 @@ int main(int argc, char *argv[])
     double chimx=48.;
 
 
-    const int y_temp_idx =0;
-    const int y_chi2_idx =5;
-    const int x_temp_idx =10;
-    const int x_chi2_idx =15;
+    const int y_2dcnn_idx =0;
+    const int y_dnn_idx =5;
+    const int x_2dcnn_idx =10;
+    const int x_dnn_idx =15;
 
     const int y_temp_fp_idx =20;
     const int x_temp_fp_idx =25;
@@ -296,21 +296,36 @@ int main(int argc, char *argv[])
     hp[x_1dcnn_idx + 1] = new TH1F("h702","dx_1dcnn (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
     hp[x_1dcnn_idx + 2] = new TH1F("h703","dx_1dcnn (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
     hp[x_1dcnn_idx + 3] = new TH1F("h704","dx_1dcnn (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
-    hp[x_1dcnn_idx + 4] = new TH1F("h705","dx_1dcnn (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_1dcnn_idx + 4] = new TH1F("h705","dx_1dcnn (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);    
+
+/*
+    hp[y_2dcnn_idx + 0] = new TH1F("h106","dy_2dcnn (all sig); #Deltay (#mum)",ny,-halfys,halfys);
+    hp[y_2dcnn_idx + 1] = new TH1F("h107","dy_2dcnn (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_2dcnn_idx + 2] = new TH1F("h108","dy_2dcnn (1.5mn > signal > 1.0mn); #Deltay (#mum)",ny,-halfys,halfys);      
+    hp[y_2dcnn_idx + 3] = new TH1F("h109","dy_2dcnn (1.0mn > signal > 0.85mn); #Deltay (#mum)",ny,-halfys,halfys);     
+    hp[y_2dcnn_idx + 4] = new TH1F("h110","dy_2dcnn (0.85mn > signal); #Deltay (#mum)",ny,-halfys,halfys);      
+
+    hp[x_2dcnn_idx + 0] = new TH1F("h101","dx_2dcnn (all sig); #Deltax (#mum)",nx,-halfxs,halfxs);
+    hp[x_2dcnn_idx + 1] = new TH1F("h102","dx_2dcnn (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_2dcnn_idx + 2] = new TH1F("h103","dx_2dcnn (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);      
+    hp[x_2dcnn_idx + 3] = new TH1F("h104","dx_2dcnn (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);     
+    hp[x_2dcnn_idx + 4] = new TH1F("h105","dx_2dcnn (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);      
+
+    hp[y_dnn_idx + 0] = new TH1F("h206","dy_dnn (all sig); #Deltay (#mum)",ny,-halfys,halfys);
+    hp[y_dnn_idx + 1] = new TH1F("h207","dy_dnn (signal > 1.5mn); #Deltay (#mum)",ny,-halfys,halfys);
+    hp[y_dnn_idx + 2] = new TH1F("h208","dy_dnn (1.5mn > signal > 1.0mn); #Deltay (#mum)",ny,-halfys,halfys);
+    hp[y_dnn_idx + 3] = new TH1F("h209","dy_dnn (1.0mn > signal > 0.85mn); #Deltay (#mum)",ny,-halfys,halfys);
+    hp[y_dnn_idx + 4]=  new TH1F("h210","dy_dnn (0.85mn > signal); #Deltay (#mum)",ny,-halfys,halfys);
+
+    hp[x_dnn_idx + 0] = new TH1F("h201","dx_dnn (all sig); #Deltax (#mum)",nx,-halfxs,halfxs);
+    hp[x_dnn_idx + 1] = new TH1F("h202","dx_dnn (signal > 1.5mn); #Deltax (#mum)",nx,-halfxs,halfxs);
+    hp[x_dnn_idx + 2] = new TH1F("h203","dx_dnn (1.5mn > signal > 1.0mn); #Deltax (#mum)",nx,-halfxs,halfxs);
+    hp[x_dnn_idx + 3] = new TH1F("h204","dx_dnn (1.0mn > signal > 0.85mn); #Deltax (#mum)",nx,-halfxs,halfxs);
+    hp[x_dnn_idx + 4]=  new TH1F("h205","dx_dnn (0.85mn > signal); #Deltax (#mum)",nx,-halfxs,halfxs);
+  */
 //========================
 
-    int nbins_prof = 10;
-    profs[y_corr_idx + 0] = new TProfile("h211","dy vs qfl (all sig) ", nbins_prof, -1., 1., -50., 50.);
-    profs[y_corr_idx + 1] = new TProfile("h212","dy vs qfl (signal > 1.5mn); ",nbins_prof, -1., 1., -50., 50.);
-    profs[y_corr_idx + 2] = new TProfile("h213","dy vs qfl (1.5mn > signal > 1.0mn)",nbins_prof, -1., 1., -50., 50.);
-    profs[y_corr_idx + 3] = new TProfile("h214","dy vs qfl (1.0mn > signal > 0.85mn)",nbins_prof, -1., 1., -50., 50.);
-    profs[y_corr_idx + 4] = new TProfile("h215","dy vs qfl (0.85mn > signal) ",nbins_prof, -1., 1., -50., 50.);
-
-    profs[x_corr_idx + 0] = new TProfile("h111","dx vs qfl (all sig) ", nbins_prof, -1., 1., -50., 50.);
-    profs[x_corr_idx + 1] = new TProfile("h112","dx vs qfl (signal > 1.5mn)",nbins_prof, -1., 1., -50., 50.);
-    profs[x_corr_idx + 2] = new TProfile("h113","dx vs qfl (1.5mn > signal > 1.0mn)",nbins_prof, -1., 1., -50., 50.);
-    profs[x_corr_idx + 3] = new TProfile("h114","dx vs qfl (1.0mn > signal > 0.85mn)",nbins_prof, -1., 1., -50., 50.);
-    profs[x_corr_idx + 4] = new TProfile("h115","dx vs qfl (0.85mn > signal) ",nbins_prof, -1., 1., -50., 50.);
+  
 
 
 
@@ -1342,12 +1357,6 @@ printf("%s\n","starting x reco");
         for(unsigned int i=0; i<hp.size(); ++i) {
             if(hp[i] == NULL) continue;
             hp[i]->Draw();
-            c1->Print(outfile1);
-            c1->Clear();
-        }
-        for(unsigned int i=0; i<profs.size(); i++){
-            if(profs[i] == NULL) continue;
-            profs[i]->Draw();
             c1->Print(outfile1);
             c1->Clear();
         }
