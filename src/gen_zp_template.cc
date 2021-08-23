@@ -540,6 +540,16 @@ int main(int argc, char *argv[])
             // read the input cluster 
             read_cluster(events_file, pixin);
 
+            //----------- Testing ---------------
+            for (int i=0; i < TXSIZE; i++) {
+                for(int  j=0; j < TYSIZE; j++){
+
+                    printf("%f ", &pixin[TXSIZE-i-1][TYSIZE-j-1]);
+                }
+                printf("\n");
+            }
+            //------------------------------------
+
 
             cotalpha = cosx/cosz;
             cotbeta = cosy/cosz;
@@ -1302,7 +1312,13 @@ int main(int argc, char *argv[])
                     cluster_local[i][j] = cluster[n][i][j];
                 }
             }
-
+            printf("Modified cluster: \n");
+            for(int i=0;i < TXSIZE;i++){
+                for(int j=0; j < TYSIZE;j++){
+                    printf("%f ",cluster_local[i][j] );
+                }
+                printf("\n");
+            }
 
 
 

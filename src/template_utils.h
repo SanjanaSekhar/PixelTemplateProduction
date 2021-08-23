@@ -74,7 +74,10 @@ struct FrontEndModel
     double vcaloffst = 60.0;
 
     //--- PhaseII - initial guess
-    double threshold = 1000; // threshold in e-
+    //double threshold = 1000; // threshold in e-
+    //--- PhaseI - BPIX L1 - initial guess
+    double threshold = 3000; // threshold in e-
+
     double qperToT = 1500; // e- per TOT
     int nbitsTOT = 4; // fixed and carved in stone?
     int ADCMax = pow(2, nbitsTOT)-1;
@@ -83,7 +86,8 @@ struct FrontEndModel
     //--- Constants (could be made variables later)
     const double gain  = 3.19;
     const double ped   = 16.46;
-    const double p0    = 0.01218;
+    //const double p0    = 0.01218;
+    const double p0    = 0.00171;
     const double p1    = 0.711;
     const double p2    = 203.;
     const double p3    = 148.;	
